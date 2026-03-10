@@ -24,7 +24,7 @@
 ### MVP でやる（例）
 
 - タスク CRUD
-- 完了/未完了切替
+- ステータス切替（TODO/DOING/DONE）
 - 期限（date or datetime はスペックで明記）
 - 優先度（LOW/MID/HIGH）
 - 検索（部分一致など仕様で明記）
