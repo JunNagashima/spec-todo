@@ -14,3 +14,9 @@ export const createTaskSchema = z.object({
 });
 
 export type CreateTaskInput = z.infer<typeof createTaskSchema>;
+
+export const sortFieldSchema = z.enum(["createdAt", "dueDate", "title"]);
+export type SortField = z.infer<typeof sortFieldSchema>;
+
+export const sortOrderSchema = z.enum(["asc", "desc"]);
+export type SortOrder = z.infer<typeof sortOrderSchema>;

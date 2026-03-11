@@ -3,12 +3,19 @@
 import type { Priority } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { createTaskSchema } from "@/schemas/task";
+import {
+	createTaskSchema,
+	type SortField,
+	type SortOrder,
+} from "@/schemas/task";
 
-export async function getTasks() {
+export async function getTasks(
+	sortField: SortField = "createdAt",
+	sortOrder: SortOrder = "desc",
+) {
 	try {
 		const tasks = await prisma.task.findMany({
-			orderBy: { createdAt: "desc" },
+			orderBy: { [sortField]: sortOrder },
 		});
 		return { success: true, data: tasks } as const;
 	} catch {

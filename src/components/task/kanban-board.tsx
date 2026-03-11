@@ -1,8 +1,15 @@
 import { getTasks } from "@/actions/task";
+import type { SortField, SortOrder } from "@/schemas/task";
+import { SortControl } from "./sort-control";
 import { KanbanColumn } from "./kanban-column";
 
-export async function KanbanBoard() {
-	const result = await getTasks();
+type Props = {
+	sortField: SortField;
+	sortOrder: SortOrder;
+};
+
+export async function KanbanBoard({ sortField, sortOrder }: Props) {
+	const result = await getTasks(sortField, sortOrder);
 
 	if (!result.success) {
 		throw new Error("一覧取得に失敗しました");
@@ -14,10 +21,13 @@ export async function KanbanBoard() {
 	const doneTasks = tasks.filter((t) => t.status === "DONE");
 
 	return (
-		<div className="flex gap-4">
-			<KanbanColumn title="TODO" tasks={todoTasks} />
-			<KanbanColumn title="DOING" tasks={doingTasks} />
-			<KanbanColumn title="DONE" tasks={doneTasks} />
+		<div>
+			<SortControl sortField={sortField} sortOrder={sortOrder} />
+			<div className="flex gap-4">
+				<KanbanColumn title="TODO" tasks={todoTasks} />
+				<KanbanColumn title="DOING" tasks={doingTasks} />
+				<KanbanColumn title="DONE" tasks={doneTasks} />
+			</div>
 		</div>
 	);
 }
