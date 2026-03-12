@@ -10,7 +10,11 @@ import {
 	type SortOrder,
 } from "@/schemas/task";
 
-type SearchParams = Promise<{ sortField?: string; sortOrder?: string }>;
+type SearchParams = Promise<{
+	sortField?: string;
+	sortOrder?: string;
+	searchTitle?: string;
+}>;
 
 export default async function Home({
 	searchParams,
@@ -26,12 +30,17 @@ export default async function Home({
 	const sortOrder: SortOrder = sortOrderResult.success
 		? sortOrderResult.data
 		: "desc";
+	const searchTitle = params.searchTitle?.trim() || undefined;
 
 	return (
 		<main className="min-h-screen p-8">
 			<KanbanBoardErrorBoundary>
 				<Suspense fallback={<KanbanBoardSkeleton />}>
-					<KanbanPageContent sortField={sortField} sortOrder={sortOrder} />
+					<KanbanPageContent
+						sortField={sortField}
+						sortOrder={sortOrder}
+						searchTitle={searchTitle}
+					/>
 				</Suspense>
 			</KanbanBoardErrorBoundary>
 		</main>
@@ -41,16 +50,22 @@ export default async function Home({
 async function KanbanPageContent({
 	sortField,
 	sortOrder,
+	searchTitle,
 }: {
 	sortField: SortField;
 	sortOrder: SortOrder;
+	searchTitle?: string;
 }) {
 	return (
 		<>
 			<div className="mb-6 flex justify-end">
 				<CreateTaskDialog />
 			</div>
-			<KanbanBoard sortField={sortField} sortOrder={sortOrder} />
+			<KanbanBoard
+				sortField={sortField}
+				sortOrder={sortOrder}
+				searchTitle={searchTitle}
+			/>
 		</>
 	);
 }

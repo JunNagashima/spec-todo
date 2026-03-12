@@ -12,9 +12,11 @@ import {
 export async function getTasks(
 	sortField: SortField = "createdAt",
 	sortOrder: SortOrder = "desc",
+	searchTitle?: string,
 ) {
 	try {
 		const tasks = await prisma.task.findMany({
+			where: searchTitle ? { title: { contains: searchTitle } } : {},
 			orderBy: { [sortField]: sortOrder },
 		});
 		return { success: true, data: tasks } as const;

@@ -1,15 +1,17 @@
 import { getTasks } from "@/actions/task";
 import type { SortField, SortOrder } from "@/schemas/task";
+import { SearchTitleForm } from "./search-title-form";
 import { SortControl } from "./sort-control";
 import { KanbanColumn } from "./kanban-column";
 
 type Props = {
 	sortField: SortField;
 	sortOrder: SortOrder;
+	searchTitle?: string;
 };
 
-export async function KanbanBoard({ sortField, sortOrder }: Props) {
-	const result = await getTasks(sortField, sortOrder);
+export async function KanbanBoard({ sortField, sortOrder, searchTitle }: Props) {
+	const result = await getTasks(sortField, sortOrder, searchTitle);
 
 	if (!result.success) {
 		throw new Error("一覧取得に失敗しました");
@@ -22,6 +24,11 @@ export async function KanbanBoard({ sortField, sortOrder }: Props) {
 
 	return (
 		<div>
+			<SearchTitleForm
+				sortField={sortField}
+				sortOrder={sortOrder}
+				searchTitle={searchTitle}
+			/>
 			<SortControl sortField={sortField} sortOrder={sortOrder} />
 			<div className="flex gap-4">
 				<KanbanColumn title="TODO" tasks={todoTasks} />
