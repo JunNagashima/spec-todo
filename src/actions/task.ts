@@ -25,6 +25,16 @@ export async function getTasks(
 	}
 }
 
+export async function getTaskById(id: number) {
+	try {
+		const task = await prisma.task.findUnique({ where: { id } });
+		if (!task) return { success: false, error: "タスクが見つかりません" } as const;
+		return { success: true, data: task } as const;
+	} catch {
+		return { success: false, error: "取得に失敗しました" } as const;
+	}
+}
+
 export async function createTask(data: unknown) {
 	const parsed = createTaskSchema.safeParse(data);
 	if (!parsed.success) {
