@@ -1,12 +1,13 @@
 "use server";
 
-import type { Priority } from "@prisma/client";
+import type { Priority, Status } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import {
 	createTaskSchema,
 	type SortField,
 	type SortOrder,
+	updateTaskSchema,
 } from "@/schemas/task";
 
 export async function getTasks(
@@ -28,10 +29,36 @@ export async function getTasks(
 export async function getTaskById(id: number) {
 	try {
 		const task = await prisma.task.findUnique({ where: { id } });
-		if (!task) return { success: false, error: "タスクが見つかりません" } as const;
+		if (!task)
+			return { success: false, error: "タスクが見つかりません" } as const;
 		return { success: true, data: task } as const;
 	} catch {
 		return { success: false, error: "取得に失敗しました" } as const;
+	}
+}
+
+export async function updateTask(id: number, data: unknown) {
+	const parsed = updateTaskSchema.safeParse(data);
+	if (!parsed.success) {
+		return { success: false, error: "入力内容が正しくありません。" } as const;
+	}
+
+	const { title, dueDate, priority, status } = parsed.data;
+
+	try {
+		await prisma.task.update({
+			where: { id },
+			data: {
+				title,
+				dueDate: new Date(dueDate),
+				priority: priority as Priority,
+				status: status as Status,
+			},
+		});
+		revalidatePath("/");
+		return { success: true } as const;
+	} catch {
+		return { success: false, error: "更新に失敗しました" } as const;
 	}
 }
 
