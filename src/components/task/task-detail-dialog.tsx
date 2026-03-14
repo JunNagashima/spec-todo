@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { getTaskById, updateTask } from "@/actions/task";
+import { deleteTask, getTaskById, updateTask } from "@/actions/task";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -193,6 +193,8 @@ export function TaskDetailDialog({ taskId, children }: Props) {
 	const [loading, setLoading] = useState(false);
 	const [task, setTask] = useState<Task | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
+	const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+	const [isDeleting, setIsDeleting] = useState(false);
 
 	const handleOpen = async () => {
 		setOpen(true);
@@ -209,10 +211,25 @@ export function TaskDetailDialog({ taskId, children }: Props) {
 	};
 
 	const handleOpenChange = (value: boolean) => {
+		if (isConfirmingDelete) return;
 		setOpen(value);
 		if (!value) {
 			setTask(null);
 			setIsEditing(false);
+		}
+	};
+
+	const handleDelete = async () => {
+		setIsDeleting(true);
+		const result = await deleteTask(taskId);
+		setIsDeleting(false);
+		if (result.success) {
+			toast.success("削除しました", { duration: 5000 });
+			setIsConfirmingDelete(false);
+			setOpen(false);
+			setTask(null);
+		} else {
+			toast.error("削除に失敗しました", { duration: 5000 });
 		}
 	};
 
@@ -272,11 +289,49 @@ export function TaskDetailDialog({ taskId, children }: Props) {
 										<dd>{formatDate(task.createdAt)}</dd>
 									</div>
 								</dl>
-								<div className="flex justify-end pt-2">
+								<div className="flex justify-end gap-2 pt-2">
+									<Button
+										variant="destructive"
+										onClick={() => setIsConfirmingDelete(true)}
+									>
+										削除
+									</Button>
 									<Button variant="outline" onClick={() => setIsEditing(true)}>
 										編集
 									</Button>
 								</div>
+								<Dialog
+									open={isConfirmingDelete}
+									onOpenChange={setIsConfirmingDelete}
+								>
+									<DialogContent showCloseButton={false}>
+										<DialogHeader>
+											<DialogTitle>タスクの削除</DialogTitle>
+										</DialogHeader>
+										<p className="text-sm">
+											このタスクを削除しますか？この操作は元に戻せません。
+										</p>
+										<div className="flex justify-end gap-2 pt-2">
+											<Button
+												variant="outline"
+												onClick={() => setIsConfirmingDelete(false)}
+												disabled={isDeleting}
+											>
+												キャンセル
+											</Button>
+											<Button
+												variant="destructive"
+												onClick={handleDelete}
+												disabled={isDeleting}
+											>
+												{isDeleting && (
+													<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+												)}
+												削除する
+											</Button>
+										</div>
+									</DialogContent>
+								</Dialog>
 							</>
 						))
 					)}

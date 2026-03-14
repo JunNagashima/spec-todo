@@ -62,6 +62,16 @@ export async function updateTask(id: number, data: unknown) {
 	}
 }
 
+export async function deleteTask(id: number) {
+	try {
+		await prisma.task.delete({ where: { id } });
+		revalidatePath("/");
+		return { success: true } as const;
+	} catch {
+		return { success: false, error: "削除に失敗しました" } as const;
+	}
+}
+
 export async function createTask(data: unknown) {
 	const parsed = createTaskSchema.safeParse(data);
 	if (!parsed.success) {
